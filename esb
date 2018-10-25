@@ -1,0 +1,27 @@
+#! /usr/bin/env groovy
+pipeline{
+	agent{
+		label 'master'
+		#label 'hjhx'
+	}
+	
+	environment {
+		def antHome= '/user/local/ant/apache-ant-1.9.7'
+		def mvnHome= tool 'M3'
+	}
+	
+	stages {
+		stage('get Code'){
+			steps{
+				checkout([$class:'SubversionSCM',addtionalCredentials:[],excludedCommitMessages:'',...])
+			}
+		}
+		stage('package'){
+			steps{
+				sh 'rm -rf SmartESB/dest/*'
+				sh "'${antHome}/bin/ant' -f SmartESB/build.xml"
+				sh 'ansible-playbook /sxapp/sxappopt/ansible_playbook/test.yml'
+			}
+		}
+	}
+}
